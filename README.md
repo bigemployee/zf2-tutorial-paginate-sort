@@ -24,8 +24,8 @@ Clone the repository and manually invoke `composer` using the shipped
 `composer.phar`:
 
     cd my/project/dir
-    git://github.com/bigemployee/Big-Sticky-Notes.git
-    cd Big-Sticky-Notes
+    git clone git://github.com/bigemployee/zf2-tutorial-paginate-sort.git
+    cd zf2-tutorial-paginate-sort
     php composer.phar self-update
     php composer.phar install
 
