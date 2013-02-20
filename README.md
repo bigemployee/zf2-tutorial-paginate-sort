@@ -1,3 +1,4 @@
-ZF2 tutorial application
+zf2-tutorial-paginate-sort
+==========================
 
-See [http://akrabat.com/zend-framework-2-tutorial/](http://akrabat.com/zend-framework-2-tutorial/)
+This tutorial extends the zf2-tutorial by akabat by adding sorting and pagination capabilities.
