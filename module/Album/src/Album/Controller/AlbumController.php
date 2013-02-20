@@ -6,20 +6,40 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Album\Model\Album;
 use Album\Form\AlbumForm;
+use Zend\Db\Sql\Select;
+use Zend\Paginator\Paginator;
+use Zend\Paginator\Adapter\Iterator as paginatorIterator;
 
-class AlbumController extends AbstractActionController
-{
+class AlbumController extends AbstractActionController {
+
     protected $albumTable;
 
-    public function indexAction()
-    {
+    public function indexAction() {
+        $select = new Select();
+
+        $order_by = $this->params()->fromRoute('order_by') ?
+                $this->params()->fromRoute('order_by') : 'id';
+        $order = $this->params()->fromRoute('order') ?
+                $this->params()->fromRoute('order') : Select::ORDER_ASCENDING;
+        $page = $this->params()->fromRoute('page') ? (int) $this->params()->fromRoute('page') : 1;
+
+        $albums = $this->getAlbumTable()->fetchAll($select->order($order_by . ' ' . $order));
+        $itemsPerPage = 2;
+
+        $paginator = new Paginator(new paginatorIterator($albums));
+        $paginator->setCurrentPageNumber($page)
+                ->setItemCountPerPage($itemsPerPage)
+                ->setPageRange(7);
+
         return new ViewModel(array(
-            'albums' => $this->getAlbumTable()->fetchAll(),
-        ));
+                    'order_by' => $order_by,
+                    'order' => $order,
+                    'page' => $page,
+                    'paginator' => $paginator,
+                ));
     }
 
-    public function addAction()
-    {
+    public function addAction() {
         $form = new AlbumForm();
         $form->get('submit')->setAttribute('value', 'Add');
 
@@ -40,18 +60,17 @@ class AlbumController extends AbstractActionController
         return array('form' => $form);
     }
 
-    public function editAction()
-    {
-        $id = (int)$this->params('id');
+    public function editAction() {
+        $id = (int) $this->params('id');
         if (!$id) {
-            return $this->redirect()->toRoute('album', array('action'=>'add'));
+            return $this->redirect()->toRoute('album', array('action' => 'add'));
         }
         $album = $this->getAlbumTable()->getAlbum($id);
 
         $form = new AlbumForm();
         $form->bind($album);
         $form->get('submit')->setAttribute('value', 'Edit');
-        
+
         $request = $this->getRequest();
         if ($request->isPost()) {
             $form->setData($request->getPost());
@@ -69,9 +88,8 @@ class AlbumController extends AbstractActionController
         );
     }
 
-    public function deleteAction()
-    {
-        $id = (int)$this->params('id');
+    public function deleteAction() {
+        $id = (int) $this->params('id');
         if (!$id) {
             return $this->redirect()->toRoute('album');
         }
@@ -80,7 +98,7 @@ class AlbumController extends AbstractActionController
         if ($request->isPost()) {
             $del = $request->getPost()->get('del', 'No');
             if ($del == 'Yes') {
-                $id = (int)$request->getPost()->get('id');
+                $id = (int) $request->getPost()->get('id');
                 $this->getAlbumTable()->deleteAlbum($id);
             }
 
@@ -94,12 +112,12 @@ class AlbumController extends AbstractActionController
         );
     }
 
-    public function getAlbumTable()
-    {
+    public function getAlbumTable() {
         if (!$this->albumTable) {
             $sm = $this->getServiceLocator();
             $this->albumTable = $sm->get('Album\Model\AlbumTable');
         }
         return $this->albumTable;
-    }    
+    }
+
 }
