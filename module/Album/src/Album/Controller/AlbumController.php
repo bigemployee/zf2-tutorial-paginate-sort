@@ -26,6 +26,7 @@ class AlbumController extends AbstractActionController {
         $albums = $this->getAlbumTable()->fetchAll($select->order($order_by . ' ' . $order));
         $itemsPerPage = 2;
 
+        $albums->current();
         $paginator = new Paginator(new paginatorIterator($albums));
         $paginator->setCurrentPageNumber($page)
                 ->setItemCountPerPage($itemsPerPage)
